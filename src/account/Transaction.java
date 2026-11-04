@@ -9,10 +9,18 @@ public class Transaction {
     private final LocalDateTime time;
 
     public Transaction(String accountId, TransactionType type, double amount) {
+        this(
+                accountId,
+                type,
+                amount,
+                LocalDateTime.now());
+    }
+
+    public Transaction(String accountId, TransactionType type, double amount, LocalDateTime time) {
         this.accountId = accountId;
         this.type = type;
         this.amount = amount;
-        this.time = LocalDateTime.now();
+        this.time = time;
     }
 
     public String getAccountId() { return accountId; }
