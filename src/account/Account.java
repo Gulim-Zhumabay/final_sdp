@@ -1,6 +1,7 @@
 package account;
 
 import observer.TransactionObserver;
+import strategy.InterestStrategy;
 
 public interface Account {
     String getId();
@@ -13,4 +14,7 @@ public interface Account {
     void withdraw(double amount);
 
     void addObserver(TransactionObserver observer);
+
+    void setInterestStrategy(InterestStrategy strategy);
+    double calculateInterest(int months);
 }

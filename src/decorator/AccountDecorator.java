@@ -2,6 +2,7 @@ package decorator;
 
 import account.Account;
 import observer.TransactionObserver;
+import strategy.InterestStrategy;
 
 public abstract class AccountDecorator implements Account {
     protected final Account wrapped;
@@ -33,4 +34,10 @@ public abstract class AccountDecorator implements Account {
 
     @Override
     public void addObserver(TransactionObserver observer) { wrapped.addObserver(observer); }
+
+    @Override
+    public void setInterestStrategy(InterestStrategy strategy) { wrapped.setInterestStrategy(strategy); }
+
+    @Override
+    public double calculateInterest(int months) { return wrapped.calculateInterest(months); }
 }

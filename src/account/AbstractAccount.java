@@ -1,7 +1,7 @@
 package account;
 
 import observer.TransactionObserver;
-
+import strategy.InterestStrategy;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,6 +10,7 @@ public abstract class AbstractAccount implements Account {
     private final String owner;
     protected double balance;
     private final List<TransactionObserver> observers = new ArrayList<>();
+    private InterestStrategy interestStrategy;
 
     public AbstractAccount(String id, String owner, double initialBalance) {
         this.id = id;
@@ -55,6 +56,18 @@ public abstract class AbstractAccount implements Account {
     @Override
     public void addObserver(TransactionObserver observer) {
         observers.add(observer);
+    }
+    @Override
+    public void setInterestStrategy(InterestStrategy strategy) {
+        this.interestStrategy = strategy;
+    }
+
+    @Override
+    public double calculateInterest(int months) {
+        if (interestStrategy == null) {
+            throw new IllegalStateException("Interest strategy is not set");
+        }
+        return interestStrategy.calculate(balance, months);
     }
 
     private void notifyObservers(Transaction transaction) {

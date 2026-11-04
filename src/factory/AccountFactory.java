@@ -3,6 +3,7 @@ package factory;
 import account.Account;
 import account.CheckingAccount;
 import account.SavingsAccount;
+import strategy.SavingsInterest;
 
 public class AccountFactory {
     private static int counter = 1;
@@ -11,8 +12,11 @@ public class AccountFactory {
         String id = "ACC-" + counter++;
 
         switch (type.toLowerCase()) {
-            case "savings":
-                return new SavingsAccount(id, owner, initialBalance);
+            case "savings": {
+                Account account = new SavingsAccount(id, owner, initialBalance);
+                account.setInterestStrategy(new SavingsInterest());
+                return account;
+            }
             case "checking":
                 return new CheckingAccount(id, owner, initialBalance);
             default:
