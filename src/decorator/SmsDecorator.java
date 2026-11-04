@@ -1,6 +1,7 @@
 package decorator;
 
 import account.Account;
+import account.TransactionType;
 
 public class SmsDecorator extends AccountDecorator {
 
@@ -9,19 +10,24 @@ public class SmsDecorator extends AccountDecorator {
     }
 
     @Override
-    public void deposit(double amount) {
-        super.deposit(amount);
-        System.out.println("[SMS to " + getOwner() + "] Deposited " + amount + ". Balance: " + getBalance());
+    public void deposit(double amount, TransactionType type) {
+        super.deposit(amount, type);
+        sendSms(type, amount);
     }
 
     @Override
-    public void withdraw(double amount) {
-        super.withdraw(amount);
-        System.out.println("[SMS to " + getOwner() + "] Withdrawn " + amount + ". Balance: " + getBalance());
+    public void withdraw(double amount, TransactionType type) {
+        super.withdraw(amount, type);
+        sendSms(type, amount);
     }
 
     @Override
     public String getDescription() {
         return wrapped.getDescription() + " + SMS";
+    }
+
+    private void sendSms(TransactionType type, double amount) {
+        System.out.println("[SMS to " + getOwner() + "] " + type + " " + amount
+                + ". Balance: " + getBalance());
     }
 }

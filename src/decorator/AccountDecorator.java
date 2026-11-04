@@ -1,6 +1,7 @@
 package decorator;
 
 import account.Account;
+import account.TransactionType;
 import observer.TransactionObserver;
 import strategy.InterestStrategy;
 
@@ -27,10 +28,10 @@ public abstract class AccountDecorator implements Account {
     public String getDescription() { return wrapped.getDescription(); }
 
     @Override
-    public void deposit(double amount) { wrapped.deposit(amount); }
+    public void deposit(double amount, TransactionType type) { wrapped.deposit(amount, type); }
 
     @Override
-    public void withdraw(double amount) { wrapped.withdraw(amount); }
+    public void withdraw(double amount, TransactionType type) { wrapped.withdraw(amount, type); }
 
     @Override
     public void addObserver(TransactionObserver observer) { wrapped.addObserver(observer); }

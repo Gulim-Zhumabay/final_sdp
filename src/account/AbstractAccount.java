@@ -2,15 +2,16 @@ package account;
 
 import observer.TransactionObserver;
 import strategy.InterestStrategy;
+
 import java.util.ArrayList;
 import java.util.List;
 
 public abstract class AbstractAccount implements Account {
     private final String id;
     private final String owner;
-    protected double balance;
     private final List<TransactionObserver> observers = new ArrayList<>();
     private InterestStrategy interestStrategy;
+    protected double balance;
 
     public AbstractAccount(String id, String owner, double initialBalance) {
         this.id = id;
@@ -33,30 +34,27 @@ public abstract class AbstractAccount implements Account {
     }
 
     @Override
-    public void deposit(double amount) {
-        if (amount <= 0) {
-            throw new IllegalArgumentException("Amount must be positive");
-        }
+    public void deposit(double amount, TransactionType type) {
+        requirePositive(amount);
         balance += amount;
-        notifyObservers(new Transaction(id, TransactionType.DEPOSIT, amount));
+        notifyObservers(new Transaction(id, type, amount));
     }
 
     @Override
-    public void withdraw(double amount) {
-        if (amount <= 0) {
-            throw new IllegalArgumentException("Amount must be positive");
-        }
+    public void withdraw(double amount, TransactionType type) {
+        requirePositive(amount);
         if (amount > balance) {
             throw new IllegalStateException("Insufficient funds");
         }
         balance -= amount;
-        notifyObservers(new Transaction(id, TransactionType.WITHDRAW, amount));
+        notifyObservers(new Transaction(id, type, amount));
     }
 
     @Override
     public void addObserver(TransactionObserver observer) {
         observers.add(observer);
     }
+
     @Override
     public void setInterestStrategy(InterestStrategy strategy) {
         this.interestStrategy = strategy;
@@ -65,9 +63,15 @@ public abstract class AbstractAccount implements Account {
     @Override
     public double calculateInterest(int months) {
         if (interestStrategy == null) {
-            throw new IllegalStateException("Interest strategy is not set");
+            throw new IllegalStateException("This account has no interest");
         }
         return interestStrategy.calculate(balance, months);
+    }
+
+    private void requirePositive(double amount) {
+        if (amount <= 0) {
+            throw new IllegalArgumentException("Amount must be positive");
+        }
     }
 
     private void notifyObservers(Transaction transaction) {

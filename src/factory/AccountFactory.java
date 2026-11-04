@@ -9,18 +9,20 @@ public class AccountFactory {
     private static int counter = 1;
 
     public static Account create(String type, String owner, double initialBalance) {
-        String id = "ACC-" + counter++;
+        return switch (type.toLowerCase()) {
+            case "savings" -> createSavings(nextId(), owner, initialBalance);
+            case "checking" -> new CheckingAccount(nextId(), owner, initialBalance);
+            default -> throw new IllegalArgumentException("Unknown account type: " + type);
+        };
+    }
 
-        switch (type.toLowerCase()) {
-            case "savings": {
-                Account account = new SavingsAccount(id, owner, initialBalance);
-                account.setInterestStrategy(new SavingsInterest());
-                return account;
-            }
-            case "checking":
-                return new CheckingAccount(id, owner, initialBalance);
-            default:
-                throw new IllegalArgumentException("Unknown account type: " + type);
-        }
+    private static Account createSavings(String id, String owner, double initialBalance) {
+        Account account = new SavingsAccount(id, owner, initialBalance);
+        account.setInterestStrategy(new SavingsInterest());
+        return account;
+    }
+
+    private static String nextId() {
+        return "ACC-" + counter++;
     }
 }
