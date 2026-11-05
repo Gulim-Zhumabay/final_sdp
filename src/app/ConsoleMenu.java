@@ -116,7 +116,6 @@ public class ConsoleMenu {
         System.out.println("1. Overdraft (checking accounts only)");
         System.out.println("2. SMS notifications");
         int option = input.readInt("Option: ");
-
         Account decorated = switch (option) {
             case 1 -> new OverdraftDecorator(requireChecking(account),
                     input.readDouble("Overdraft limit: "));

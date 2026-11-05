@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class TransactionCsvStore {
-    private static final String HEADER = "time,accountId,owner,type,amount";
+    private static final String HEADER = "time,accountId,owner,operation,amount";
     private static final String SEPARATOR = ",";
 
     private final Path file;

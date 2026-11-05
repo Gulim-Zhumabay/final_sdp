@@ -9,7 +9,7 @@ import observer.FraudDetector;
 import observer.TransactionLogger;
 import storage.AccountCsvStore;
 import storage.TransactionCsvStore;
-
+import java.util.stream.Collectors;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -55,6 +55,19 @@ public class Bank {
 
     public Collection<Account> getAllAccounts() {
         return accounts.values();
+    }
+    public List<Account> getAccountsOf(String owner) {
+        return accounts.values().stream()
+                .filter(account -> account.getOwner().equals(owner))
+                .collect(Collectors.toList());
+    }
+
+    public Account getOwnedAccount(String id, String owner) {
+        Account account = getAccount(id);
+        if (!account.getOwner().equals(owner)) {
+            throw new IllegalArgumentException("Account not found: " + id);
+        }
+        return account;
     }
 
     public List<Transaction> getHistory(String accountId) {
