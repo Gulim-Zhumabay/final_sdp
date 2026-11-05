@@ -4,6 +4,11 @@ import account.Account;
 import account.Transaction;
 import decorator.OverdraftDecorator;
 import decorator.SmsDecorator;
+import service.InterestService;
+import service.TransferService;
+import strategy.DepositInterest;
+import strategy.InterestStrategy;
+import strategy.SavingsInterest;
 
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -14,6 +19,8 @@ public class ConsoleMenu {
 
     private final Bank bank;
     private final ConsoleInput input = new ConsoleInput();
+    private final TransferService transferService = new TransferService();
+    private final InterestService interestService = new InterestService();
 
     public ConsoleMenu(Bank bank) {
         this.bank = bank;
@@ -42,6 +49,8 @@ public class ConsoleMenu {
                 case 4 -> withdraw();
                 case 5 -> addOption();
                 case 6 -> showStatement();
+                case 7 -> transfer();
+                case 8 -> accrueInterest();
                 default -> System.out.println("Unknown option");
             }
         } catch (IllegalArgumentException | IllegalStateException e) {
@@ -57,6 +66,8 @@ public class ConsoleMenu {
         System.out.println("4. Withdraw");
         System.out.println("5. Add option (overdraft / SMS)");
         System.out.println("6. Account statement");
+        System.out.println("7. Transfer between accounts");
+        System.out.println("8. Accrue interest");
         System.out.println("0. Exit");
     }
 
@@ -124,5 +135,30 @@ public class ConsoleMenu {
                     transaction.getType(),
                     transaction.getAmount());
         }
+    }
+    private void transfer() {
+        System.out.println("From which account?");
+        Account from = chooseAccount();
+        Account to = bank.getAccount(input.readLine("To account ID: "));
+        double amount = input.readDouble("Amount: ");
+
+        transferService.transfer(from, to, amount);
+        System.out.println(from.getId() + ": " + from.getBalance()
+                + " | " + to.getId() + ": " + to.getBalance());
+    }
+
+    private void accrueInterest() {
+        Account account = chooseAccount();
+        System.out.println("1. Savings plan (3% simple)");
+        System.out.println("2. Deposit plan (7% compound)");
+        InterestStrategy strategy = switch (input.readInt("Plan: ")) {
+            case 1 -> new SavingsInterest();
+            case 2 -> new DepositInterest();
+            default -> throw new IllegalArgumentException("Unknown plan");
+        };
+        int months = input.readInt("Months: ");
+
+        double interest = interestService.accrue(account, strategy, months);
+        System.out.println("Accrued " + interest + ". New balance: " + account.getBalance());
     }
 }
