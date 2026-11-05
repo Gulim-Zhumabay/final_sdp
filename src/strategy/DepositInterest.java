@@ -1,7 +1,7 @@
 package strategy;
 
 public class DepositInterest implements InterestStrategy {
-    private static final double ANNUAL_RATE = 0.07;
+    private static final double ANNUAL_RATE = 0.15;
 
     @Override
     public double calculate(double amount, int months) {

@@ -2,33 +2,38 @@ package factory;
 
 import account.Account;
 import account.CheckingAccount;
+import account.DepositAccount;
 import account.SavingsAccount;
-import strategy.SavingsInterest;
+import strategy.DepositInterest;
 
 public class AccountFactory {
     private static final String ID_PREFIX = "ACC-";
     private static int counter = 1;
 
-    public static Account create(String type, String owner, double initialBalance) {
-        return build(type, nextId(), owner, initialBalance);
+    public static Account create(String type, String owner, double initialBalance, int termMonths) {
+        return build(type, nextId(), owner, initialBalance, termMonths, 0);
     }
 
-    public static Account restore(String id, String type, String owner, double balance) {
+    public static Account restore(String id, String type, String owner, double balance,
+                                  int termMonths, int monthsElapsed) {
         registerExistingId(id);
-        return build(type, id, owner, balance);
+        return build(type, id, owner, balance, termMonths, monthsElapsed);
     }
 
-    private static Account build(String type, String id, String owner, double balance) {
+    private static Account build(String type, String id, String owner, double balance,
+                                 int termMonths, int monthsElapsed) {
         return switch (type.toLowerCase()) {
-            case "savings" -> createSavings(id, owner, balance);
+            case "savings" -> new SavingsAccount(id, owner, balance);
             case "checking" -> new CheckingAccount(id, owner, balance);
+            case "deposit" -> createDeposit(id, owner, balance, termMonths, monthsElapsed);
             default -> throw new IllegalArgumentException("Unknown account type: " + type);
         };
     }
 
-    private static Account createSavings(String id, String owner, double balance) {
-        Account account = new SavingsAccount(id, owner, balance);
-        account.setInterestStrategy(new SavingsInterest());
+    private static Account createDeposit(String id, String owner, double balance,
+                                         int termMonths, int monthsElapsed) {
+        Account account = new DepositAccount(id, owner, balance, termMonths, monthsElapsed);
+        account.setInterestStrategy(new DepositInterest());
         return account;
     }
 

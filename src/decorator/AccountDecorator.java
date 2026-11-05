@@ -4,6 +4,7 @@ import account.Account;
 import account.TransactionType;
 import observer.TransactionObserver;
 import strategy.InterestStrategy;
+import java.util.Optional;
 
 public abstract class AccountDecorator implements Account {
     protected final Account wrapped;
@@ -41,4 +42,12 @@ public abstract class AccountDecorator implements Account {
 
     @Override
     public double calculateInterest(int months) { return wrapped.calculateInterest(months); }
+    @Override
+    public Optional<String> endOfMonth() { return wrapped.endOfMonth(); }
+
+    @Override
+    public int getTermMonths() { return wrapped.getTermMonths(); }
+
+    @Override
+    public int getMonthsElapsed() { return wrapped.getMonthsElapsed(); }
 }

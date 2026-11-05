@@ -3,6 +3,8 @@ package account;
 import observer.TransactionObserver;
 import strategy.InterestStrategy;
 
+import java.util.Optional;
+
 public interface Account {
     String getId();
     String getOwner();
@@ -25,4 +27,16 @@ public interface Account {
 
     void setInterestStrategy(InterestStrategy strategy);
     double calculateInterest(int months);
+
+    default Optional<String> endOfMonth() {
+        return Optional.empty();
+    }
+
+    default int getTermMonths() {
+        return 0;
+    }
+
+    default int getMonthsElapsed() {
+        return 0;
+    }
 }
