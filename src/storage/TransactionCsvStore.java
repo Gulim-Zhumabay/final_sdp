@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class TransactionCsvStore {
-    private static final String HEADER = "time,accountId,type,amount";
+    private static final String HEADER = "time,accountId,owner,type,amount";
     private static final String SEPARATOR = ",";
 
     private final Path file;
@@ -28,6 +28,7 @@ public class TransactionCsvStore {
         String line = String.join(SEPARATOR,
                 transaction.getTime().toString(),
                 transaction.getAccountId(),
+                transaction.getOwner(),
                 transaction.getType().name(),
                 String.valueOf(transaction.getAmount()));
         try {
@@ -52,8 +53,9 @@ public class TransactionCsvStore {
         String[] parts = line.split(SEPARATOR);
         return new Transaction(
                 parts[1],
-                TransactionType.valueOf(parts[2]),
-                Double.parseDouble(parts[3]),
+                parts[2],
+                TransactionType.valueOf(parts[3]),
+                Double.parseDouble(parts[4]),
                 LocalDateTime.parse(parts[0]));
     }
 

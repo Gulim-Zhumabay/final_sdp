@@ -13,6 +13,7 @@ import storage.TransactionCsvStore;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.ArrayList;
 import java.util.Map;
 
 public class Bank {
@@ -28,9 +29,9 @@ public class Bank {
         loadAccounts();
     }
 
-    public Account openAccount(String type, String owner, double initialBalance) {
+    public Account openAccount(String type, String owner, double initialBalance, int termMonths) {
         validateOwner(owner);
-        Account account = AccountFactory.create(type, owner, 0);
+        Account account = AccountFactory.create(type, owner, 0, termMonths);
         register(account);
         if (initialBalance > 0) {
             account.deposit(initialBalance);
@@ -58,6 +59,14 @@ public class Bank {
 
     public List<Transaction> getHistory(String accountId) {
         return historyStore.findByAccount(accountId);
+    }
+    public List<String> closeMonth() {
+        List<String> reports = new ArrayList<>();
+        for (Account account : accounts.values()) {
+            account.endOfMonth().ifPresent(reports::add);
+        }
+        saveAccounts();
+        return reports;
     }
 
     private void loadAccounts() {

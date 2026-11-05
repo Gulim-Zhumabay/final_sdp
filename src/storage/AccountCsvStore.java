@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class AccountCsvStore {
-    private static final String HEADER = "id,type,owner,balance";
+    private static final String HEADER = "id,type,owner,balance,termMonths,monthsElapsed";
     private static final String SEPARATOR = ",";
 
     private final Path file;
@@ -55,11 +55,17 @@ public class AccountCsvStore {
                 account.getId(),
                 account.getType(),
                 account.getOwner(),
-                String.valueOf(account.getBalance()));
+                String.valueOf(account.getBalance()),
+                String.valueOf(account.getTermMonths()),
+                String.valueOf(account.getMonthsElapsed()));
     }
 
     private Account parse(String line) {
         String[] parts = line.split(SEPARATOR);
-        return AccountFactory.restore(parts[0], parts[1], parts[2], Double.parseDouble(parts[3]));
+        return AccountFactory.restore(
+                parts[0], parts[1], parts[2],
+                Double.parseDouble(parts[3]),
+                Integer.parseInt(parts[4]),
+                Integer.parseInt(parts[5]));
     }
 }
