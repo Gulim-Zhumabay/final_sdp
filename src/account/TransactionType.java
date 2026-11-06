@@ -1,11 +1,13 @@
 package account;
 
 public enum TransactionType {
-    DEPOSIT,
+    TOP_UP,
     WITHDRAW,
     TRANSFER_IN,
     TRANSFER_OUT,
     INTEREST,
     LOAN_PAYOUT,
-    EXTERNAL_PAYMENT
+    LOAN_PAYMENT,
+    EXTERNAL_PAYMENT,
+    REFUND
 }
