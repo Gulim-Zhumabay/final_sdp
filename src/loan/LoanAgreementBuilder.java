@@ -21,6 +21,9 @@ public class LoanAgreementBuilder {
     }
 
     public LoanAgreementBuilder guarantor(String guarantor) {
+        if (guarantor.isBlank() || guarantor.contains(",")) {
+            throw new IllegalArgumentException("Guarantor name must not be empty or contain commas");
+        }
         this.guarantor = guarantor;
         return this;
     }
