@@ -37,7 +37,7 @@ public abstract class AbstractAccount implements Account {
     public void deposit(double amount, TransactionType type) {
         requirePositive(amount);
         balance += amount;
-        notifyObservers(new Transaction(id, type, amount));
+        notifyObservers(new Transaction(id, owner, type, amount));
     }
 
     @Override
@@ -47,7 +47,7 @@ public abstract class AbstractAccount implements Account {
             throw new IllegalStateException("Insufficient funds");
         }
         balance -= amount;
-        notifyObservers(new Transaction(id, type, amount));
+        notifyObservers(new Transaction(id, owner, type, amount));
     }
 
     @Override

@@ -9,17 +9,19 @@ import service.TransferService;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
-public class ConsoleMenu {
+public class CustomerMenu {
     private static final DateTimeFormatter TIME_FORMAT =
             DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss");
-    private static final String DEFAULT_ACCOUNT_PROMPT = "Account ID (e.g. ACC-1): ";
 
     private final Bank bank;
-    private final ConsoleInput input = new ConsoleInput();
+    private final String owner;
+    private final ConsoleInput input;
     private final TransferService transferService = new TransferService();
 
-    public ConsoleMenu(Bank bank) {
+    public CustomerMenu(Bank bank, String owner, ConsoleInput input) {
         this.bank = bank;
+        this.owner = owner;
+        this.input = input;
     }
 
     public void run() {
@@ -33,7 +35,7 @@ public class ConsoleMenu {
                 execute(choice);
             }
         }
-        System.out.println("Goodbye!");
+        System.out.println("Logged out.");
     }
 
     private void execute(int choice) {
@@ -41,7 +43,7 @@ public class ConsoleMenu {
             switch (choice) {
                 case 1 -> createAccount();
                 case 2 -> showAccounts();
-                case 3 -> deposit();
+                case 3 -> topUp();
                 case 4 -> withdraw();
                 case 5 -> addOption();
                 case 6 -> showStatement();
@@ -55,20 +57,19 @@ public class ConsoleMenu {
     }
 
     private void printMenu() {
-        System.out.println("\n===== BANKING SYSTEM =====");
+        System.out.println("\n===== BANKING SYSTEM | " + owner + " =====");
         System.out.println("1. Open account");
-        System.out.println("2. Show accounts");
-        System.out.println("3. Deposit money");
+        System.out.println("2. My accounts");
+        System.out.println("3. Top up account");
         System.out.println("4. Withdraw money");
         System.out.println("5. Add option (overdraft / SMS)");
         System.out.println("6. Account statement");
         System.out.println("7. Transfer money");
         System.out.println("8. Next month (pay deposit interest)");
-        System.out.println("0. Exit");
+        System.out.println("0. Log out");
     }
 
     private void createAccount() {
-        String owner = input.readLine("Owner name: ");
         String type = input.readLine("Type (savings / checking / deposit): ");
         int termMonths = type.equalsIgnoreCase("deposit")
                 ? input.readInt("Deposit term (months): ")
@@ -80,26 +81,27 @@ public class ConsoleMenu {
     }
 
     private void showAccounts() {
-        if (bank.getAllAccounts().isEmpty()) {
-            System.out.println("No accounts yet.");
+        List<Account> accounts = bank.getAccountsOf(owner);
+        if (accounts.isEmpty()) {
+            System.out.println("You have no accounts yet.");
             return;
         }
-        bank.getAllAccounts().forEach(account -> System.out.println(account.getDescription()));
-    }
-
-    private Account chooseAccount() {
-        return chooseAccount(DEFAULT_ACCOUNT_PROMPT);
+        accounts.forEach(account -> System.out.println(account.getDescription()));
     }
 
     private Account chooseAccount(String prompt) {
-        if (bank.getAllAccounts().isEmpty()) {
-            throw new IllegalStateException("No accounts yet. Open one first.");
+        if (bank.getAccountsOf(owner).isEmpty()) {
+            throw new IllegalStateException("You have no accounts yet. Open one first.");
         }
         showAccounts();
-        return bank.getAccount(input.readLine(prompt));
+        return bank.getOwnedAccount(input.readLine(prompt), owner);
     }
 
-    private void deposit() {
+    private Account chooseAccount() {
+        return chooseAccount("Account ID (e.g. ACC-1): ");
+    }
+
+    private void topUp() {
         Account account = chooseAccount();
         account.deposit(input.readDouble("Amount: "));
         System.out.println("New balance: " + account.getBalance());
@@ -116,6 +118,7 @@ public class ConsoleMenu {
         System.out.println("1. Overdraft (checking accounts only)");
         System.out.println("2. SMS notifications");
         int option = input.readInt("Option: ");
+
         Account decorated = switch (option) {
             case 1 -> new OverdraftDecorator(requireChecking(account),
                     input.readDouble("Overdraft limit: "));
@@ -149,13 +152,12 @@ public class ConsoleMenu {
     }
 
     private void transfer() {
-        Account sender = chooseAccount("Sender account ID: ");
-        Account receiver = bank.getAccount(input.readLine("Receiver account ID: "));
+        Account sender = chooseAccount("From your account ID: ");
+        Account receiver = bank.getAccount(input.readLine("To account ID (any customer): "));
         double amount = input.readDouble("Amount: ");
 
         transferService.transfer(sender, receiver, amount);
-        System.out.println("Sender " + sender.getId() + " balance: " + sender.getBalance());
-        System.out.println("Receiver " + receiver.getId() + " balance: " + receiver.getBalance());
+        System.out.println("Your account " + sender.getId() + " balance: " + sender.getBalance());
     }
 
     private void nextMonth() {
