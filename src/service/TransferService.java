@@ -10,6 +10,11 @@ public class TransferService {
             throw new IllegalArgumentException("Cannot transfer to the same account");
         }
         from.withdraw(amount, TransactionType.TRANSFER_OUT);
-        to.deposit(amount, TransactionType.TRANSFER_IN);
+        try {
+            to.deposit(amount, TransactionType.TRANSFER_IN);
+        } catch (IllegalStateException e) {
+            from.deposit(amount, TransactionType.REFUND);
+            throw e;
+        }
     }
 }

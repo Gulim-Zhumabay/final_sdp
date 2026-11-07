@@ -38,7 +38,7 @@ public class DepositAccount extends AbstractAccount {
 
     @Override
     public void deposit(double amount, TransactionType type) {
-        if (type != TransactionType.INTEREST && balance > 0) {
+        if (type != TransactionType.INTEREST && type != TransactionType.REFUND && balance > 0) {
             throw new IllegalStateException("A term deposit cannot be topped up");
         }
         super.deposit(amount, type);
