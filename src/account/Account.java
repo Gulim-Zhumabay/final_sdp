@@ -16,7 +16,7 @@ public interface Account {
     void withdraw(double amount, TransactionType type);
 
     default void deposit(double amount) {
-        deposit(amount, TransactionType.DEPOSIT);
+        deposit(amount, TransactionType.TOP_UP);
     }
 
     default void withdraw(double amount) {

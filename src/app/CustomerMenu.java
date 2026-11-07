@@ -8,6 +8,12 @@ import service.TransferService;
 
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import loan.Loan;
+import loan.LoanAgreement;
+import service.ExternalPaymentService;
+import service.LoanService;
+
+import java.util.ArrayList;
 
 public class CustomerMenu {
     private static final DateTimeFormatter TIME_FORMAT =
@@ -16,12 +22,17 @@ public class CustomerMenu {
     private final Bank bank;
     private final String owner;
     private final ConsoleInput input;
+    private final LoanService loanService;
+    private final ExternalPaymentService paymentService;
     private final TransferService transferService = new TransferService();
 
-    public CustomerMenu(Bank bank, String owner, ConsoleInput input) {
+    public CustomerMenu(Bank bank, String owner, ConsoleInput input,
+                        LoanService loanService, ExternalPaymentService paymentService) {
         this.bank = bank;
         this.owner = owner;
         this.input = input;
+        this.loanService = loanService;
+        this.paymentService = paymentService;
     }
 
     public void run() {
@@ -49,6 +60,9 @@ public class CustomerMenu {
                 case 6 -> showStatement();
                 case 7 -> transfer();
                 case 8 -> nextMonth();
+                case 9 -> takeLoan();
+                case 10 -> showLoans();
+                case 11 -> externalPayment();
                 default -> System.out.println("Unknown option");
             }
         } catch (IllegalArgumentException | IllegalStateException e) {
@@ -66,6 +80,9 @@ public class CustomerMenu {
         System.out.println("6. Account statement");
         System.out.println("7. Transfer money");
         System.out.println("8. Next month (pay deposit interest)");
+        System.out.println("9. Take a loan");
+        System.out.println("10. My loans");
+        System.out.println("11. External payment (Visa / SWIFT)");
         System.out.println("0. Log out");
     }
 
@@ -161,11 +178,50 @@ public class CustomerMenu {
     }
 
     private void nextMonth() {
-        List<String> reports = bank.closeMonth();
+        List<String> reports = new ArrayList<>(bank.closeMonth());
+        reports.addAll(loanService.collectPayments());
         if (reports.isEmpty()) {
-            System.out.println("A month has passed. No active deposits.");
+            System.out.println("A month has passed. No active deposits or loans.");
             return;
         }
         reports.forEach(System.out::println);
+    }
+    private void takeLoan() {
+        Account account = chooseAccount("Account to receive the loan: ");
+        double amount = input.readDouble("Loan amount: ");
+        int months = input.readInt("Term (months): ");
+        String guarantor = input.readLine("Guarantor name (Enter to skip): ");
+        boolean insured = input.readLine("Add insurance? (y/n): ").equalsIgnoreCase("y");
+
+        LoanAgreement agreement = loanService.createAgreement(owner, amount, months, guarantor, insured);
+        Loan loan = loanService.issue(account, agreement);
+        System.out.println("Loan approved: " + loan.getDescription());
+        System.out.println("Paid out to " + account.getId() + ". New balance: " + account.getBalance());
+    }
+
+    private void showLoans() {
+        List<Loan> loans = loanService.getLoansOf(owner);
+        if (loans.isEmpty()) {
+            System.out.println("You have no loans.");
+            return;
+        }
+        loans.forEach(loan -> System.out.println(loan.getDescription()));
+    }
+
+    private void externalPayment() {
+        Account account = chooseAccount("Pay from account ID: ");
+        List<String> systems = paymentService.getGatewayNames();
+        for (int i = 0; i < systems.size(); i++) {
+            System.out.println((i + 1) + ". " + systems.get(i));
+        }
+        int choice = input.readInt("Payment system: ");
+        if (choice < 1 || choice > systems.size()) {
+            throw new IllegalArgumentException("Unknown payment system");
+        }
+        String recipient = input.readLine("Recipient (card / IBAN / merchant): ");
+        double amount = input.readDouble("Amount: ");
+
+        paymentService.pay(account, systems.get(choice - 1), recipient, amount);
+        System.out.println("Payment sent. New balance: " + account.getBalance());
     }
 }
