@@ -30,10 +30,10 @@ public class OverdraftDecorator extends AccountDecorator {
         if (shortfall > overdraftLimit - overdraftUsed) {
             throw new IllegalStateException("Overdraft limit exceeded");
         }
+        overdraftUsed += shortfall;
         if (balance > 0) {
             wrapped.withdraw(balance, type);
         }
-        overdraftUsed += shortfall;
         System.out.println("[OVERDRAFT] Used " + shortfall + " of overdraft");
     }
 
