@@ -3,7 +3,6 @@ package factory;
 import account.Account;
 import account.CheckingAccount;
 import account.DepositAccount;
-import account.SavingsAccount;
 import strategy.DepositInterest;
 
 public class AccountFactory {
@@ -23,10 +22,10 @@ public class AccountFactory {
     private static Account build(String type, String id, String owner, double balance,
                                  int termMonths, int monthsElapsed) {
         return switch (type.toLowerCase()) {
-            case "savings" -> new SavingsAccount(id, owner, balance);
             case "checking" -> new CheckingAccount(id, owner, balance);
             case "deposit" -> createDeposit(id, owner, balance, termMonths, monthsElapsed);
-            default -> throw new IllegalArgumentException("Unknown account type: " + type);
+            default -> throw new IllegalArgumentException(
+                    "Unknown account type: " + type + " (use checking or deposit)");
         };
     }
 

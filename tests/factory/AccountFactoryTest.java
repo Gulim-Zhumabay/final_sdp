@@ -10,19 +10,12 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 class AccountFactoryTest {
 
     @Test
-    void createsSavingsAccount() {
-        Account account = AccountFactory.create("savings", "gulim", 1000, 0);
-
-        assertEquals("Savings", account.getType());
-        assertEquals("gulim", account.getOwner());
-        assertEquals(1000.0, account.getBalance());
-    }
-
-    @Test
-    void createsCheckingAccount() {
-        Account account = AccountFactory.create("checking", "gulim", 0, 0);
+    void createsCheckingAccountWithBalance() {
+        Account account = AccountFactory.create("checking", "gulim", 1000, 0);
 
         assertEquals("Checking", account.getType());
+        assertEquals("gulim", account.getOwner());
+        assertEquals(1000.0, account.getBalance());
     }
 
     @Test
@@ -36,15 +29,21 @@ class AccountFactoryTest {
 
     @Test
     void typeNameIsCaseInsensitive() {
-        Account account = AccountFactory.create("SAVINGS", "gulim", 0, 0);
+        Account account = AccountFactory.create("CHECKING", "gulim", 0, 0);
 
-        assertEquals("Savings", account.getType());
+        assertEquals("Checking", account.getType());
     }
 
     @Test
     void unknownTypeIsRejected() {
         assertThrows(IllegalArgumentException.class,
                 () -> AccountFactory.create("gold", "gulim", 0, 0));
+    }
+
+    @Test
+    void savingsTypeIsNoLongerSupported() {
+        assertThrows(IllegalArgumentException.class,
+                () -> AccountFactory.create("savings", "gulim", 0, 0));
     }
 
     @Test
@@ -68,13 +67,12 @@ class AccountFactoryTest {
     void depositGetsInterestStrategy() {
         Account account = AccountFactory.create("deposit", "gulim", 1200, 12);
 
-        // 15% годовых, один месяц: 1200 * 0.15 / 12 = 15
         assertEquals(15.0, account.calculateInterest(1), 0.001);
     }
 
     @Test
-    void savingsHasNoInterest() {
-        Account account = AccountFactory.create("savings", "gulim", 1000, 0);
+    void checkingHasNoInterest() {
+        Account account = AccountFactory.create("checking", "gulim", 1000, 0);
 
         assertThrows(IllegalStateException.class, () -> account.calculateInterest(1));
     }
