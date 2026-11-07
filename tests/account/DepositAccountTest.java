@@ -82,8 +82,6 @@ class DepositAccountTest {
         account.endOfMonth();
         account.endOfMonth();
         account.endOfMonth();
-
-        // 1215.00 -> 1230.19 -> 1245.57 (проценты округляются до копеек каждый месяц)
         assertEquals(1245.57, account.getBalance(), 0.001);
     }
 
