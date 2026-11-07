@@ -50,4 +50,15 @@ public abstract class AccountDecorator implements Account {
 
     @Override
     public int getMonthsElapsed() { return wrapped.getMonthsElapsed(); }
+    @Override
+    public String getOptionsCode() {
+        String inner = wrapped.getOptionsCode();
+        String own = getOwnCode();
+        if (inner.isEmpty()) {
+            return own;
+        }
+        return inner + "|" + own;
+    }
+
+    protected abstract String getOwnCode();
 }

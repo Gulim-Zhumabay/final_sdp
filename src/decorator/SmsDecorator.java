@@ -30,4 +30,8 @@ public class SmsDecorator extends AccountDecorator {
         System.out.println("[SMS to " + getOwner() + "] " + type + " " + amount
                 + ". Balance: " + getBalance());
     }
+    @Override
+    protected String getOwnCode() {
+        return "SMS";
+    }
 }

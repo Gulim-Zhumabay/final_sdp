@@ -39,4 +39,7 @@ public interface Account {
     default int getMonthsElapsed() {
         return 0;
     }
+    default String getOptionsCode() {
+        return "";
+    }
 }

@@ -11,6 +11,12 @@ public class OverdraftDecorator extends AccountDecorator {
         super(wrapped);
         this.overdraftLimit = overdraftLimit;
     }
+    public OverdraftDecorator(Account wrapped, double overdraftLimit, double overdraftUsed) {
+        super(wrapped);
+        this.overdraftLimit = overdraftLimit;
+        this.overdraftUsed = overdraftUsed;
+    }
+
 
     @Override
     public void withdraw(double amount, TransactionType type) {
@@ -35,5 +41,9 @@ public class OverdraftDecorator extends AccountDecorator {
     public String getDescription() {
         return wrapped.getDescription()
                 + " + Overdraft(limit " + overdraftLimit + ", used " + overdraftUsed + ")";
+    }
+    @Override
+    protected String getOwnCode() {
+        return "OVERDRAFT:" + overdraftLimit + ":" + overdraftUsed;
     }
 }
