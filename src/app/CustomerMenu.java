@@ -88,7 +88,7 @@ public class CustomerMenu {
     }
 
     private void createAccount() {
-        String type = input.readLine("Type (savings / checking / deposit): ");
+        String type = input.readLine("Type (checking / deposit): ");
         int termMonths = type.equalsIgnoreCase("deposit")
                 ? input.readInt("Deposit term (months): ")
                 : 0;
