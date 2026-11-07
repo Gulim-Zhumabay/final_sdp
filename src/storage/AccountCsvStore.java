@@ -12,10 +12,12 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import decorator.DecoratorFactory;
 
 public class AccountCsvStore {
-    private static final String HEADER = "id,type,owner,balance,termMonths,monthsElapsed";
+    private static final String HEADER = "id,type,owner,balance,termMonths,monthsElapsed,options";
     private static final String SEPARATOR = ",";
+    private static final String NO_OPTIONS = "-";
 
     private final Path file;
 
@@ -51,21 +53,24 @@ public class AccountCsvStore {
     }
 
     private String toLine(Account account) {
+        String options = account.getOptionsCode();
         return String.join(SEPARATOR,
                 account.getId(),
                 account.getType(),
                 account.getOwner(),
                 String.valueOf(account.getBalance()),
                 String.valueOf(account.getTermMonths()),
-                String.valueOf(account.getMonthsElapsed()));
+                String.valueOf(account.getMonthsElapsed()),
+                options.isEmpty() ? NO_OPTIONS : options);
     }
 
     private Account parse(String line) {
         String[] parts = line.split(SEPARATOR);
-        return AccountFactory.restore(
+        Account base = AccountFactory.restore(
                 parts[0], parts[1], parts[2],
                 Double.parseDouble(parts[3]),
                 Integer.parseInt(parts[4]),
                 Integer.parseInt(parts[5]));
+        return DecoratorFactory.applyOptions(base, parts[6]);
     }
 }

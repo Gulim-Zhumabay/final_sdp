@@ -107,4 +107,7 @@ public class Bank {
             throw new IllegalArgumentException("Owner name must not be empty or contain commas");
         }
     }
+    public void save() {
+        saveAccounts();
+    }
 }

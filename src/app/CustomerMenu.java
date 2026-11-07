@@ -65,6 +65,7 @@ public class CustomerMenu {
                 case 11 -> externalPayment();
                 default -> System.out.println("Unknown option");
             }
+            bank.save();
         } catch (IllegalArgumentException | IllegalStateException e) {
             System.out.println("Error: " + e.getMessage());
         }
