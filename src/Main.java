@@ -1,7 +1,6 @@
 import app.Bank;
-import customer.Customer;
-import gui.Dialogs;
 import gui.LoginFrame;
+import gui.MainFrame;
 import payment.SwiftAdapter;
 import payment.SwiftApi;
 import payment.VisaAdapter;
@@ -37,18 +36,24 @@ public class Main {
 
         SwingUtilities.invokeLater(() -> {
             useSystemLookAndFeel();
-            new LoginFrame(authService, Main::showLoggedIn).setVisible(true);
+            showLogin(bank, authService, loanService, paymentService);
         });
     }
 
-    private static void showLoggedIn(Customer customer) {
-        Dialogs.showInfo(null, "Logged in as " + customer.getUsername());
+    private static void showLogin(Bank bank, AuthService authService,
+                                  LoanService loanService, ExternalPaymentService paymentService) {
+        Runnable backToLogin = () -> showLogin(bank, authService, loanService, paymentService);
+        new LoginFrame(authService, customer ->
+                new MainFrame(bank, customer.getUsername(), loanService, paymentService, backToLogin)
+                        .setVisible(true)
+        ).setVisible(true);
     }
 
     private static void useSystemLookAndFeel() {
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (ReflectiveOperationException | UnsupportedLookAndFeelException e) {
+
         }
     }
 }

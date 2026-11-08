@@ -60,6 +60,7 @@ public class LoginFrame extends JFrame {
         Dialogs.run(this, () -> {
             Customer customer = authService.login(username(), password());
             passwordField.setText("");
+            dispose();
             onLogin.accept(customer);
         });
     }
