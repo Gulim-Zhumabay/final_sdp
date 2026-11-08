@@ -32,4 +32,8 @@ public class Transaction {
     public String toString() {
         return type + " " + amount + " on " + accountId + " (" + owner + ")";
     }
+    public String describe() {
+        return type.getLabel() + " " + String.format(java.util.Locale.US, "%,.2f", amount)
+                + " on " + accountId;
+    }
 }

@@ -15,6 +15,9 @@ public final class Theme {
     public static final Color ROW_ALT = new Color(0xF5FAFB);
     public static final Color BORDER = new Color(0xD3DADD);
     public static final Color MUTED = new Color(0x5E7080);
+    public static final Color DANGER = new Color(0xB03A2E);
+    public static final Color WARNING = new Color(0xB9770E);
+    public static final Color SUCCESS = new Color(0x1E8449);
 
     public static final Font FONT = new Font("Segoe UI", Font.PLAIN, 14);
     public static final Font FONT_BOLD = FONT.deriveFont(Font.BOLD);
@@ -48,7 +51,6 @@ public final class Theme {
                 }
             }
         } catch (ReflectiveOperationException | UnsupportedLookAndFeelException e) {
-            // the standard look is fine too
         }
     }
 }

@@ -23,7 +23,9 @@ public class LogPanel extends CardPanel {
         area.setEditable(false);
         area.setLineWrap(true);
         area.setWrapStyleWord(true);
-        area.setOpaque(false);
+        area.setUI(new javax.swing.plaf.basic.BasicTextAreaUI());
+        area.setOpaque(true);
+        area.setBackground(Theme.NAVY);
         area.setFont(Theme.FONT_MONO);
         area.setForeground(Theme.AQUA);
 
