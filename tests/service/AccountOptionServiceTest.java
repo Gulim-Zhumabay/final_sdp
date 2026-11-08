@@ -64,4 +64,10 @@ class AccountOptionServiceTest {
         assertEquals("OVERDRAFT:500.0:0.0|SMS", withBoth.getOptionsCode());
         assertEquals(2, replaced.size());
     }
+    @Test
+    void sameOptionCannotBeAddedTwice() {
+        Account withSms = service.addSms(checking());
+
+        assertThrows(IllegalStateException.class, () -> service.addSms(withSms));
+    }
 }

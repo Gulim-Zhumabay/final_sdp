@@ -29,17 +29,20 @@ public class MainFrame extends JFrame {
     private static final String ACCOUNTS = "Accounts";
     private static final String LOANS = "Loans";
     private static final String PAYMENTS = "Payments";
+    private static final String NOTIFICATIONS = "Notifications";
     private static final int SIDEBAR_WIDTH = 230;
 
     private final Bank bank;
     private final LoanService loanService;
     private final Runnable onLogout;
-    private final LogPanel logPanel = new LogPanel();
+    private final NotificationsPanel notifications = new NotificationsPanel();
     private final CardLayout pages = new CardLayout();
     private final JPanel pageHost = new JPanel(pages);
     private final JLabel pageTitle = Ui.title(ACCOUNTS);
     private final Map<String, StyledButton> navButtons = new LinkedHashMap<>();
     private final List<Refreshable> panels;
+    private String currentPage = ACCOUNTS;
+    private int unread = 0;
 
     public MainFrame(Bank bank, String owner, LoanService loanService,
                      ExternalPaymentService paymentService, Runnable onLogout) {
@@ -61,15 +64,17 @@ public class MainFrame extends JFrame {
         pageHost.add(accounts, ACCOUNTS);
         pageHost.add(loans, LOANS);
         pageHost.add(payments, PAYMENTS);
+        pageHost.add(notifications, NOTIFICATIONS);
 
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         add(buildSidebar(owner), BorderLayout.WEST);
         add(buildContent(), BorderLayout.CENTER);
 
+        notifications.setOnNew(this::onNewNotification);
+        notifications.captureConsole();
         showPage(ACCOUNTS);
-        logPanel.captureConsole();
-        setSize(1120, 720);
-        setMinimumSize(new Dimension(1000, 660));
+        setSize(1120, 700);
+        setMinimumSize(new Dimension(1000, 620));
         setLocationRelativeTo(null);
     }
 
@@ -96,7 +101,7 @@ public class MainFrame extends JFrame {
         sidebar.add(left(caption));
         sidebar.add(left(name));
         sidebar.add(Box.createVerticalStrut(32));
-        for (String page : List.of(ACCOUNTS, LOANS, PAYMENTS)) {
+        for (String page : List.of(ACCOUNTS, LOANS, PAYMENTS, NOTIFICATIONS)) {
             sidebar.add(left(navButton(page)));
             sidebar.add(Box.createVerticalStrut(6));
         }
@@ -110,10 +115,9 @@ public class MainFrame extends JFrame {
     private JPanel buildContent() {
         JPanel content = new JPanel(new BorderLayout(0, 16));
         content.setBackground(Theme.BACKGROUND);
-        content.setBorder(BorderFactory.createEmptyBorder(24, 28, 20, 28));
+        content.setBorder(BorderFactory.createEmptyBorder(24, 28, 24, 28));
         content.add(pageTitle, BorderLayout.NORTH);
         content.add(pageHost, BorderLayout.CENTER);
-        content.add(logPanel, BorderLayout.SOUTH);
         return content;
     }
 
@@ -149,9 +153,26 @@ public class MainFrame extends JFrame {
     }
 
     private void showPage(String name) {
+        currentPage = name;
+        if (NOTIFICATIONS.equals(name)) {
+            unread = 0;
+            updateNotificationsButton();
+        }
         pages.show(pageHost, name);
         pageTitle.setText(name);
         navButtons.forEach((title, button) -> button.setActive(title.equals(name)));
+    }
+
+    private void onNewNotification() {
+        if (!NOTIFICATIONS.equals(currentPage)) {
+            unread++;
+            updateNotificationsButton();
+        }
+    }
+
+    private void updateNotificationsButton() {
+        String text = unread == 0 ? NOTIFICATIONS : NOTIFICATIONS + " (" + unread + ")";
+        navButtons.get(NOTIFICATIONS).setText(text);
     }
 
     private void changed() {
@@ -170,7 +191,7 @@ public class MainFrame extends JFrame {
     }
 
     private void logOut() {
-        logPanel.restoreConsole();
+        notifications.restoreConsole();
         dispose();
         onLogout.run();
     }

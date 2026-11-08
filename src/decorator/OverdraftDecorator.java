@@ -34,7 +34,8 @@ public class OverdraftDecorator extends AccountDecorator {
         if (balance > 0) {
             wrapped.withdraw(balance, type);
         }
-        System.out.println("[OVERDRAFT] Used " + shortfall + " of overdraft");
+        System.out.println("[OVERDRAFT] Overdraft used: "
+                + String.format(java.util.Locale.US, "%,.2f", shortfall) + " on " + getId());
     }
 
     @Override

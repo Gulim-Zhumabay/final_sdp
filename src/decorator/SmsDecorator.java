@@ -27,8 +27,10 @@ public class SmsDecorator extends AccountDecorator {
     }
 
     private void sendSms(TransactionType type, double amount) {
-        System.out.println("[SMS to " + getOwner() + "] " + type + " " + amount
-                + ". Balance: " + getBalance());
+        System.out.println("[SMS] " + type.getLabel() + " "
+                + String.format(java.util.Locale.US, "%,.2f", amount)
+                + ". Balance: "
+                + String.format(java.util.Locale.US, "%,.2f", getBalance()));
     }
     @Override
     protected String getOwnCode() {

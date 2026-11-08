@@ -22,10 +22,16 @@ public class AccountOptionService {
         if (limit <= 0) {
             throw new IllegalArgumentException("Overdraft limit must be positive");
         }
+        if (account.getOptionsCode().contains("OVERDRAFT")) {
+            throw new IllegalStateException("Overdraft is already enabled");
+        }
         return apply(new OverdraftDecorator(account, limit));
     }
 
     public Account addSms(Account account) {
+        if (account.getOptionsCode().contains("SMS")) {
+            throw new IllegalStateException("SMS notifications are already enabled");
+        }
         return apply(new SmsDecorator(account));
     }
 
