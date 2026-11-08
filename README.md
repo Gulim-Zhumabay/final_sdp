@@ -2,8 +2,8 @@
 
 Final project for the Software Design Patterns course.
 
-- Group: [GROUP]
-- Team members: [STUDENT A NAME], [STUDENT B NAME]
+- Group: SE-2539
+- Team members: Gulim Zhumabay, Aiymay Tleu
 ## 1. About the project
 
 Banking System is a desktop application where a customer can register, log in, open accounts, move money, take loans and make external payments. All data is saved in CSV files, so it stays after the application is closed.
@@ -25,14 +25,14 @@ The project demonstrates six design patterns working together in one application
 
 ## 3. Design patterns
 
-| Pattern | Student         | What it does in the project | Main classes |
-|---|-----------------|---|---|
-| Factory | Gulim           | Creates accounts by type name and restores them from the file | AccountFactory, DecoratorFactory |
-| Decorator | Gulim           | Adds overdraft and SMS to an account without changing the account class | AccountDecorator, OverdraftDecorator, SmsDecorator |
-| Strategy | Guim            | Calculates interest with interchangeable formulas | InterestStrategy, DepositInterest, LoanInterest |
-| Builder | [STUDENT B NAME] | Assembles a loan agreement step by step | LoanAgreementBuilder, LoanAgreement |
-| Observer | [STUDENT B NAME] | Every account notifies its subscribers about each operation | TransactionObserver, FraudDetector, CustomerNotifier, TransactionLogger, AccountSaver |
-| Adapter | [STUDENT B NAME] | Gives Visa and SWIFT one common interface | PaymentGateway, VisaAdapter, SwiftAdapter |
+| Pattern | Student | What it does in the project | Main classes |
+|---|---------|---|---|
+| Factory | Gulim   | Creates accounts by type name and restores them from the file | AccountFactory, DecoratorFactory |
+| Decorator | Gulim   | Adds overdraft and SMS to an account without changing the account class | AccountDecorator, OverdraftDecorator, SmsDecorator |
+| Strategy | Guim    | Calculates interest with interchangeable formulas | InterestStrategy, DepositInterest, LoanInterest |
+| Builder | Aiymay  | Assembles a loan agreement step by step | LoanAgreementBuilder, LoanAgreement |
+| Observer | Aiymay  | Every account notifies its subscribers about each operation | TransactionObserver, FraudDetector, CustomerNotifier, TransactionLogger, AccountSaver |
+| Adapter | Aiymay  | Gives Visa and SWIFT one common interface | PaymentGateway, VisaAdapter, SwiftAdapter |
 
 Each student implemented three patterns on their own. The patterns also work together:
 
