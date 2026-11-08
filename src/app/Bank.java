@@ -17,7 +17,7 @@ import java.util.ArrayList;
 import java.util.Map;
 
 public class Bank {
-    private static final double FRAUD_LIMIT = 10000;
+    private static final double FRAUD_LIMIT = 100000;
 
     private final Map<String, Account> accounts = new LinkedHashMap<>();
     private final TransactionCsvStore historyStore;
