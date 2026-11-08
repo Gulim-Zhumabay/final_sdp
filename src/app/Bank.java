@@ -94,7 +94,7 @@ public class Bank {
     private void attachObservers(Account account) {
         account.addObserver(new TransactionLogger(historyStore));
         account.addObserver(new AccountSaver(accountStore, accounts::values));
-        account.addObserver(new CustomerNotifier(account.getOwner()));
+        account.addObserver(new CustomerNotifier());
         account.addObserver(new FraudDetector(FRAUD_LIMIT));
     }
 

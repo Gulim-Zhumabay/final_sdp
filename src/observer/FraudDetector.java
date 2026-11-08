@@ -12,7 +12,8 @@ public class FraudDetector implements TransactionObserver {
     @Override
     public void onTransaction(Transaction transaction) {
         if (transaction.getAmount() > limit) {
-            System.out.println("[FRAUD ALERT] Suspicious transaction: " + transaction);
+            System.out.println("[FRAUD ALERT] Large operation: " + transaction.describe()
+                    + " (" + transaction.getOwner() + ")");
         }
     }
 }
