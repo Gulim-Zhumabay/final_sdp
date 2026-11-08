@@ -39,7 +39,7 @@ public final class Dialogs {
         return askText(parent, prompt).map(Dialogs::parseWholeNumber);
     }
 
-    private static double parseNumber(String text) {
+    public static double parseNumber(String text) {
         try {
             return Double.parseDouble(text.replace(',', '.'));
         } catch (NumberFormatException e) {
@@ -47,7 +47,7 @@ public final class Dialogs {
         }
     }
 
-    private static int parseWholeNumber(String text) {
+    public static int parseWholeNumber(String text) {
         try {
             return Integer.parseInt(text);
         } catch (NumberFormatException e) {

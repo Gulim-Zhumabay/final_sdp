@@ -9,6 +9,7 @@ import java.io.PrintStream;
 
 public class LogPanel extends JPanel {
     private final JTextArea area = new JTextArea(6, 60);
+    private PrintStream originalConsole = System.out;
 
     public LogPanel() {
         super(new BorderLayout());
@@ -20,14 +21,18 @@ public class LogPanel extends JPanel {
     }
 
     public void captureConsole() {
-        PrintStream console = System.out;
-        System.setOut(new PrintStream(console, true) {
+        originalConsole = System.out;
+        System.setOut(new PrintStream(originalConsole, true) {
             @Override
             public void println(String line) {
                 super.println(line);
                 log(line);
             }
         });
+    }
+
+    public void restoreConsole() {
+        System.setOut(originalConsole);
     }
 
     private void log(String line) {
