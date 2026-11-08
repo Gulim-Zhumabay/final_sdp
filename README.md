@@ -51,7 +51,7 @@ Strategy. A deposit account delegates interest calculation to its InterestStrate
 
 Builder. LoanService builds an agreement with required fields in the constructor and optional fields (rate, guarantor, insurance) by chained calls. The result is an immutable object. The loan file reader uses the same builder.
 
-Observer. AbstractAccount keeps a list of observers and notifies them after each successful operation. The bank subscribes four observers to every account: operation history, account saving, customer notification and fraud detection (amounts above 10,000).
+Observer. AbstractAccount keeps a list of observers and notifies them after each successful operation. The bank subscribes four observers to every account: operation history, account saving, customer notification and fraud detection (amounts above 100,000).
 
 Adapter. VisaApi and SwiftApi have different methods and parameters. VisaAdapter and SwiftAdapter translate the common pay call into these foreign APIs. ExternalPaymentService works only with PaymentGateway, so a new payment system can be added without changing the service.
 
@@ -144,7 +144,7 @@ A quick scenario to see all patterns:
 
 1. Open a checking account with a balance of 1000, and a deposit account for 3 months.
 2. Select the checking account and add Overdraft, then SMS.
-3. Top up the checking account with 20000 and open the Notifications page (Observer, Decorator).
+3. Top up the checking account with 150000 and open the Notifications page (Observer, Decorator).
 4. Withdraw more than the balance (Decorator).
 5. Open the Loans page, take a loan with a guarantor and insurance (Builder, Strategy).
 6. Open the Payments page and pay through Visa and then through SWIFT (Adapter).
