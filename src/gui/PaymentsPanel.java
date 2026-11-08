@@ -3,39 +3,44 @@ package gui;
 import account.Account;
 import service.ExternalPaymentService;
 
-import javax.swing.BorderFactory;
-import javax.swing.JButton;
 import javax.swing.JComboBox;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
 import java.util.List;
-import java.util.Locale;
 import java.util.function.Supplier;
 
 public class PaymentsPanel extends JPanel implements Refreshable {
-    private static final String HINT =
-            "Recipient: a merchant name (Visa) or an IBAN (SWIFT).";
+    private static final String HELP = "<html><div style='width:260px'>"
+            + "Visa: enter a merchant name.<br><br>"
+            + "SWIFT: enter the recipient IBAN.<br><br>"
+            + "The money is taken from your account first. If the payment system "
+            + "declines the payment, the money is returned automatically "
+            + "and you will see a REFUND in the statement.</div></html>";
 
     private final ExternalPaymentService paymentService;
     private final Runnable onChange;
     private final AccountSelector accountSelector;
     private final JComboBox<String> systemBox;
-    private final JTextField recipientField = new JTextField(15);
-    private final JTextField amountField = new JTextField("50", 15);
+    private final JTextField recipientField = Ui.styled(new JTextField(18));
+    private final JTextField amountField = Ui.styled(new JTextField("50", 18));
 
     public PaymentsPanel(Supplier<List<Account>> accounts,
                          ExternalPaymentService paymentService, Runnable onChange) {
-        super(new BorderLayout(8, 8));
+        super(new BorderLayout());
         this.paymentService = paymentService;
         this.onChange = onChange;
-        this.accountSelector = new AccountSelector(accounts);
-        this.systemBox = new JComboBox<>(paymentService.getGatewayNames().toArray(new String[0]));
+        this.accountSelector = Ui.styled(new AccountSelector(accounts));
+        this.systemBox = Ui.styled(new JComboBox<String>(
+                paymentService.getGatewayNames().toArray(new String[0])));
 
-        setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
-        add(buildForm(), BorderLayout.NORTH);
+        setOpaque(false);
+        JPanel cards = new JPanel(new GridLayout(1, 2, 16, 0));
+        cards.setOpaque(false);
+        cards.add(buildFormCard());
+        cards.add(buildHelpCard());
+        add(cards, BorderLayout.NORTH);
     }
 
     @Override
@@ -43,26 +48,31 @@ public class PaymentsPanel extends JPanel implements Refreshable {
         accountSelector.refresh();
     }
 
-    private JPanel buildForm() {
-        JPanel grid = new JPanel(new GridLayout(0, 2, 8, 8));
-        grid.add(new JLabel("Pay from account:"));
-        grid.add(accountSelector);
-        grid.add(new JLabel("Payment system:"));
-        grid.add(systemBox);
-        grid.add(new JLabel("Recipient:"));
-        grid.add(recipientField);
-        grid.add(new JLabel("Amount:"));
-        grid.add(amountField);
-
-        JButton pay = new JButton("Pay");
+    private CardPanel buildFormCard() {
+        StyledButton pay = new StyledButton("Send payment", StyledButton.Kind.PRIMARY);
         pay.addActionListener(e -> Dialogs.run(this, this::pay));
-        grid.add(new JLabel(""));
-        grid.add(pay);
 
-        JPanel form = new JPanel(new BorderLayout(8, 8));
-        form.add(new JLabel(HINT), BorderLayout.NORTH);
-        form.add(grid, BorderLayout.CENTER);
-        return form;
+        FormPanel form = new FormPanel();
+        form.addWide(Ui.heading("New payment"));
+        form.addRow("Pay from account", accountSelector);
+        form.addRow("Payment system", systemBox);
+        form.addRow("Recipient", recipientField);
+        form.addRow("Amount", amountField);
+        form.addWide(pay);
+
+        CardPanel card = new CardPanel(new BorderLayout());
+        card.add(form, BorderLayout.NORTH);
+        return card;
+    }
+
+    private CardPanel buildHelpCard() {
+        FormPanel help = new FormPanel();
+        help.addWide(Ui.heading("How it works"));
+        help.addWide(Ui.body(HELP), 12);
+
+        CardPanel card = new CardPanel(new BorderLayout());
+        card.add(help, BorderLayout.NORTH);
+        return card;
     }
 
     private void pay() {
@@ -72,8 +82,7 @@ public class PaymentsPanel extends JPanel implements Refreshable {
 
         paymentService.pay(account, system, recipientField.getText().trim(), amount);
 
-        Dialogs.showInfo(this, "Payment sent. New balance: "
-                + String.format(Locale.US, "%.2f", account.getBalance()));
+        Dialogs.showInfo(this, "Payment sent. New balance: " + Ui.money(account.getBalance()));
         onChange.run();
     }
 }
