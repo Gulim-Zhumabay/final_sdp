@@ -1,5 +1,7 @@
 import app.Bank;
-import app.StartMenu;
+import customer.Customer;
+import gui.Dialogs;
+import gui.LoginFrame;
 import payment.SwiftAdapter;
 import payment.SwiftApi;
 import payment.VisaAdapter;
@@ -13,6 +15,9 @@ import storage.CustomerCsvStore;
 import storage.LoanCsvStore;
 import storage.TransactionCsvStore;
 
+import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
 import java.nio.file.Path;
 import java.util.List;
 
@@ -30,6 +35,20 @@ public class Main {
                 new VisaAdapter(new VisaApi()),
                 new SwiftAdapter(new SwiftApi(), "KASPKZKA", "USD")));
 
-        new StartMenu(bank, authService, loanService, paymentService).run();
+        SwingUtilities.invokeLater(() -> {
+            useSystemLookAndFeel();
+            new LoginFrame(authService, Main::showLoggedIn).setVisible(true);
+        });
+    }
+
+    private static void showLoggedIn(Customer customer) {
+        Dialogs.showInfo(null, "Logged in as " + customer.getUsername());
+    }
+
+    private static void useSystemLookAndFeel() {
+        try {
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+        } catch (ReflectiveOperationException | UnsupportedLookAndFeelException e) {
+        }
     }
 }
