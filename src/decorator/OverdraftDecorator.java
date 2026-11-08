@@ -17,6 +17,15 @@ public class OverdraftDecorator extends AccountDecorator {
         this.overdraftUsed = overdraftUsed;
     }
 
+    @Override
+    public void deposit(double amount, TransactionType type) {
+        double repay = Math.min(amount, overdraftUsed);
+        overdraftUsed -= repay;
+        double rest = amount - repay;
+        if (rest > 0) {
+            wrapped.deposit(rest, type);
+        }
+    }
 
     @Override
     public void withdraw(double amount, TransactionType type) {
