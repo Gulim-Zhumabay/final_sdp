@@ -6,28 +6,30 @@ import app.Bank;
 import service.AccountOptionService;
 import service.TransferService;
 
-import javax.swing.JButton;
+import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
-import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.table.DefaultTableModel;
 import java.awt.BorderLayout;
-import java.awt.FlowLayout;
-import java.awt.Font;
+import java.awt.Dimension;
+import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.Locale;
 
 public class AccountsPanel extends JPanel implements Refreshable {
     private static final String[] COLUMNS = {"ID", "Type", "Balance", "Term", "Options"};
+    private static final int BALANCE_COLUMN = 2;
     private static final String NONE = "-";
+    private static final int ACTION_GAP = 10;
     private static final DateTimeFormatter TIME_FORMAT =
             DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss");
 
@@ -36,26 +38,28 @@ public class AccountsPanel extends JPanel implements Refreshable {
     private final AccountOptionService optionService;
     private final TransferService transferService;
     private final Runnable onChange;
-    private final DefaultTableModel model = new DefaultTableModel(COLUMNS, 0) {
-        @Override
-        public boolean isCellEditable(int row, int column) {
-            return false;
-        }
-    };
+    private final DefaultTableModel model = Ui.readOnlyModel(COLUMNS);
     private final JTable table = new JTable(model);
+    private final JLabel totalValue = new JLabel();
+    private final JLabel countValue = new JLabel();
 
     public AccountsPanel(Bank bank, String owner, AccountOptionService optionService,
                          TransferService transferService, Runnable onChange) {
-        super(new BorderLayout());
+        super(new BorderLayout(0, 16));
         this.bank = bank;
         this.owner = owner;
         this.optionService = optionService;
         this.transferService = transferService;
         this.onChange = onChange;
 
+        setOpaque(false);
+        Ui.styleTable(table);
+        Ui.alignRight(table, BALANCE_COLUMN);
         table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        add(new JScrollPane(table), BorderLayout.CENTER);
-        add(buildButtons(), BorderLayout.SOUTH);
+
+        add(buildHeader(), BorderLayout.NORTH);
+        add(buildTableCard(), BorderLayout.CENTER);
+        add(buildActions(), BorderLayout.SOUTH);
         refresh();
     }
 
@@ -64,11 +68,13 @@ public class AccountsPanel extends JPanel implements Refreshable {
         int row = table.getSelectedRow();
         String selectedId = row >= 0 ? (String) model.getValueAt(row, 0) : "";
 
+        List<Account> accounts = bank.getAccountsOf(owner);
         model.setRowCount(0);
-        for (Account account : bank.getAccountsOf(owner)) {
-            model.addRow(toRow(account));
-        }
+        accounts.forEach(account -> model.addRow(toRow(account)));
         selectRowWithId(selectedId);
+
+        totalValue.setText(Ui.money(accounts.stream().mapToDouble(Account::getBalance).sum()));
+        countValue.setText(String.valueOf(accounts.size()));
     }
 
     private void selectRowWithId(String id) {
@@ -82,29 +88,92 @@ public class AccountsPanel extends JPanel implements Refreshable {
 
     private Object[] toRow(Account account) {
         String term = account.getTermMonths() > 0
-                ? account.getMonthsElapsed() + "/" + account.getTermMonths() + " months"
+                ? account.getMonthsElapsed() + " / " + account.getTermMonths() + " months"
                 : NONE;
         String options = account.getOptionsCode().isEmpty() ? NONE : account.getOptionsCode();
         return new Object[]{account.getId(), account.getType(),
-                String.format(Locale.US, "%.2f", account.getBalance()), term, options};
+                Ui.money(account.getBalance()), term, options};
     }
 
-    private JPanel buildButtons() {
-        JPanel buttons = new JPanel(new FlowLayout(FlowLayout.CENTER, 8, 8));
-        addButton(buttons, "Open account", this::openAccount);
-        addButton(buttons, "Top up", this::topUp);
-        addButton(buttons, "Withdraw", this::withdraw);
-        addButton(buttons, "Transfer", this::transfer);
-        addButton(buttons, "Add overdraft", this::addOverdraft);
-        addButton(buttons, "Add SMS", this::addSms);
-        addButton(buttons, "Statement", this::showStatement);
-        return buttons;
+    private JPanel buildHeader() {
+        JPanel stats = new JPanel();
+        stats.setLayout(new BoxLayout(stats, BoxLayout.X_AXIS));
+        stats.setOpaque(false);
+        stats.add(statCard("Total balance", totalValue));
+        stats.add(Box.createHorizontalStrut(12));
+        stats.add(statCard("Accounts", countValue));
+
+        JPanel openWrapper = new JPanel(new GridBagLayout());
+        openWrapper.setOpaque(false);
+        openWrapper.add(actionButton("+ Open account", StyledButton.Kind.PRIMARY, this::openAccount));
+
+        JPanel header = new JPanel(new BorderLayout());
+        header.setOpaque(false);
+        header.add(stats, BorderLayout.WEST);
+        header.add(openWrapper, BorderLayout.EAST);
+        return header;
     }
 
-    private void addButton(JPanel panel, String title, Runnable action) {
-        JButton button = new JButton(title);
+    private CardPanel statCard(String caption, JLabel value) {
+        value.setFont(Theme.FONT_HEADING.deriveFont(24f));
+        value.setForeground(Theme.NAVY);
+
+        CardPanel card = new CardPanel(new BorderLayout(0, 2));
+        card.setBorder(BorderFactory.createEmptyBorder(12, 18, 12, 18));
+        card.setPreferredSize(new Dimension(210, 76));
+        card.add(Ui.muted(caption), BorderLayout.NORTH);
+        card.add(value, BorderLayout.CENTER);
+        return card;
+    }
+
+    private CardPanel buildTableCard() {
+        JPanel head = new JPanel(new GridLayout(2, 1, 0, 2));
+        head.setOpaque(false);
+        head.add(Ui.heading("Your accounts"));
+        head.add(Ui.muted("Select an account in the table, then choose an action below."));
+
+        CardPanel card = new CardPanel(new BorderLayout(0, 12));
+        card.add(head, BorderLayout.NORTH);
+        card.add(Ui.scroll(table), BorderLayout.CENTER);
+        return card;
+    }
+
+    private JPanel buildActions() {
+        JPanel money = actionRow();
+        addAction(money, "Top up", this::topUp);
+        addAction(money, "Withdraw", this::withdraw);
+        addAction(money, "Transfer", this::transfer);
+        addAction(money, "Statement", this::showStatement);
+
+        JPanel options = actionRow();
+        addAction(options, "Overdraft", this::addOverdraft);
+        addAction(options, "SMS", this::addSms);
+
+        JPanel bar = new JPanel(new BorderLayout());
+        bar.setOpaque(false);
+        bar.add(money, BorderLayout.WEST);
+        bar.add(options, BorderLayout.EAST);
+        return bar;
+    }
+
+    private JPanel actionRow() {
+        JPanel row = new JPanel();
+        row.setLayout(new BoxLayout(row, BoxLayout.X_AXIS));
+        row.setOpaque(false);
+        return row;
+    }
+
+    private void addAction(JPanel row, String title, Runnable action) {
+        if (row.getComponentCount() > 0) {
+            row.add(Box.createHorizontalStrut(ACTION_GAP));
+        }
+        row.add(actionButton(title, StyledButton.Kind.SECONDARY, action));
+    }
+
+    private StyledButton actionButton(String title, StyledButton.Kind kind, Runnable action) {
+        StyledButton button = new StyledButton(title, kind);
         button.addActionListener(e -> Dialogs.run(this, action));
-        panel.add(button);
+        return button;
     }
 
     private Account selectedAccount() {
@@ -116,16 +185,14 @@ public class AccountsPanel extends JPanel implements Refreshable {
     }
 
     private void openAccount() {
-        JComboBox<String> type = new JComboBox<>(new String[]{"checking", "deposit"});
-        JTextField balance = new JTextField("0");
-        JTextField term = new JTextField("3");
-        JPanel form = new JPanel(new GridLayout(3, 2, 8, 8));
-        form.add(new JLabel("Type:"));
-        form.add(type);
-        form.add(new JLabel("Initial balance:"));
-        form.add(balance);
-        form.add(new JLabel("Term, months (deposit only):"));
-        form.add(term);
+        JComboBox<String> type = Ui.styled(new JComboBox<String>(new String[]{"checking", "deposit"}));
+        JTextField balance = Ui.styled(new JTextField("0", 18));
+        JTextField term = Ui.styled(new JTextField("3", 18));
+
+        FormPanel form = new FormPanel();
+        form.addRow("Account type", type);
+        form.addRow("Initial balance", balance);
+        form.addRow("Term in months (deposit only)", term);
 
         int answer = JOptionPane.showConfirmDialog(this, form, "Open account",
                 JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
@@ -183,22 +250,25 @@ public class AccountsPanel extends JPanel implements Refreshable {
     private void showStatement() {
         Account account = selectedAccount();
         List<Transaction> history = bank.getHistory(account.getId());
-
-        StringBuilder text = new StringBuilder();
-        for (Transaction transaction : history) {
-            text.append(String.format(Locale.US, "%s  %-16s %10.2f%n",
-                    transaction.getTime().format(TIME_FORMAT),
-                    transaction.getType(),
-                    transaction.getAmount()));
-        }
         if (history.isEmpty()) {
-            text.append("No operations yet.");
+            Dialogs.showInfo(this, "No operations yet.");
+            return;
         }
 
-        JTextArea area = new JTextArea(text.toString(), 15, 48);
-        area.setEditable(false);
-        area.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
-        JOptionPane.showMessageDialog(this, new JScrollPane(area),
+        DefaultTableModel rows = Ui.readOnlyModel("Date", "Operation", "Amount");
+        for (Transaction transaction : history) {
+            rows.addRow(new Object[]{
+                    transaction.getTime().format(TIME_FORMAT),
+                    transaction.getType().name().replace('_', ' '),
+                    Ui.money(transaction.getAmount())});
+        }
+        JTable statement = new JTable(rows);
+        Ui.styleTable(statement);
+        Ui.alignRight(statement, 2);
+
+        JScrollPane pane = Ui.scroll(statement);
+        pane.setPreferredSize(new Dimension(560, 320));
+        JOptionPane.showMessageDialog(this, pane,
                 "Statement " + account.getId(), JOptionPane.PLAIN_MESSAGE);
     }
 }

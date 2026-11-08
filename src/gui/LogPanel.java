@@ -1,23 +1,39 @@
 package gui;
 
 import javax.swing.BorderFactory;
-import javax.swing.JPanel;
+import javax.swing.JLabel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import java.awt.BorderLayout;
+import java.awt.Font;
 import java.io.PrintStream;
 
-public class LogPanel extends JPanel {
-    private final JTextArea area = new JTextArea(6, 60);
+public class LogPanel extends CardPanel {
+    private final JTextArea area = new JTextArea(5, 60);
     private PrintStream originalConsole = System.out;
 
     public LogPanel() {
-        super(new BorderLayout());
+        super(new BorderLayout(0, 8), Theme.NAVY, Theme.NAVY);
+        setBorder(BorderFactory.createEmptyBorder(12, 16, 12, 16));
+
+        JLabel header = new JLabel("NOTIFICATIONS");
+        header.setFont(Theme.FONT_SMALL.deriveFont(Font.BOLD));
+        header.setForeground(Theme.AQUA);
+
         area.setEditable(false);
         area.setLineWrap(true);
         area.setWrapStyleWord(true);
-        setBorder(BorderFactory.createTitledBorder("Notifications"));
-        add(new JScrollPane(area), BorderLayout.CENTER);
+        area.setOpaque(false);
+        area.setFont(Theme.FONT_MONO);
+        area.setForeground(Theme.AQUA);
+
+        JScrollPane scroll = new JScrollPane(area);
+        scroll.setBorder(BorderFactory.createEmptyBorder());
+        scroll.setBackground(Theme.NAVY);
+        scroll.getViewport().setBackground(Theme.NAVY);
+
+        add(header, BorderLayout.NORTH);
+        add(scroll, BorderLayout.CENTER);
     }
 
     public void captureConsole() {
