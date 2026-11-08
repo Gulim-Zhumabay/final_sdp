@@ -59,17 +59,23 @@ Adapter. VisaApi and SwiftApi have different methods and parameters. VisaAdapter
 
 One diagram per pattern is stored in the images folder.
 
-![Factory](images/factory.png)
+Factory method:
+![Factory](images/Factory.png)
 
-![Decorator](images/decorator.png)
+Decorator pattern:
+![Decorator](images/Decorator.png)
 
-![Strategy](images/strategy.png)
+Strategy pattern
+![Strategy](images/Strategy.png)
 
-![Builder](images/builder.png)
+Builder pattern:
+![Builder](images/Builder.png)
 
-![Observer](images/observer.png)
+Observer pattern:
+![Observer](images/Observer.png)
 
-![Adapter](images/adapter.png)
+Adapter Pattern:
+![Adapter](images/Adapter.png)
 
 
 ## 6. Screenshots
