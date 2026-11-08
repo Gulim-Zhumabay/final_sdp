@@ -10,7 +10,9 @@ public enum TransactionType {
     LOAN_PAYOUT,
     LOAN_PAYMENT,
     EXTERNAL_PAYMENT,
-    REFUND;
+    REFUND,
+    OVERDRAFT,
+    OVERDRAFT_REPAY;
 
     public String getLabel() {
         String words = name().replace('_', ' ').toLowerCase(Locale.ROOT);

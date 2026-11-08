@@ -21,9 +21,9 @@ public class OverdraftDecorator extends AccountDecorator {
     public void deposit(double amount, TransactionType type) {
         double repay = Math.min(amount, overdraftUsed);
         overdraftUsed -= repay;
-        double rest = amount - repay;
-        if (rest > 0) {
-            wrapped.deposit(rest, type);
+        wrapped.deposit(amount, type);
+        if (repay > 0) {
+            wrapped.withdraw(repay, TransactionType.OVERDRAFT_REPAY);
         }
     }
 
@@ -40,9 +40,8 @@ public class OverdraftDecorator extends AccountDecorator {
             throw new IllegalStateException("Overdraft limit exceeded");
         }
         overdraftUsed += shortfall;
-        if (balance > 0) {
-            wrapped.withdraw(balance, type);
-        }
+        wrapped.deposit(shortfall, TransactionType.OVERDRAFT);
+        wrapped.withdraw(amount, type);
         System.out.println("[OVERDRAFT] Overdraft used: "
                 + String.format(java.util.Locale.US, "%,.2f", shortfall) + " on " + getId());
     }
